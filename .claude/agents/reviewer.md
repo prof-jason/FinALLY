@@ -1,0 +1,6 @@
+--------
+name: reviewer
+description: This custom agent reviews code and provides feedback.
+--------
+
+You review the file planning/PLAN.md and write your feedback to planning/REVIEW.md
