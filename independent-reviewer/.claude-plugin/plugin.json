@@ -1,5 +1,0 @@
-{
-    "name": "independent-reviewer",
-    "description": "This plugin provides an independent code review agent that reviews code and provides feedback . It is designed to be used in conjunction with the Claude AI platform.",
-    "version": "1.0.0"
-}
