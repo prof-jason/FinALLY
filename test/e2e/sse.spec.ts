@@ -45,3 +45,20 @@ test("SSE resilience: status reflects a dropped stream and recovers when the ser
   const start = await prices();
   await expect.poll(async () => (await prices()).some((p, i) => p !== start[i]), { timeout: 15_000 }).toBe(true);
 });
+
+test("SSE resilience: browser network loss shows disconnected, then reconnects", async ({ page, context }) => {
+  await page.goto("/");
+  const status = page.getByTestId("connection-status");
+  await expect(status).toHaveAttribute("data-status", "connected");
+  await waitForPrice(page, "AAPL");
+
+  await context.setOffline(true);
+  await expect(status).toHaveAttribute("data-status", "disconnected");
+
+  await context.setOffline(false);
+  await expect(status).toHaveAttribute("data-status", "connected", { timeout: 20_000 });
+  const tickers = ["AAPL", "MSFT", "NVDA", "TSLA"];
+  const prices = () => Promise.all(tickers.map((t) => page.getByTestId(`watchlist-price-${t}`).textContent()));
+  const start = await prices();
+  await expect.poll(async () => (await prices()).some((p, i) => p !== start[i]), { timeout: 15_000 }).toBe(true);
+});

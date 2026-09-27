@@ -1,6 +1,9 @@
 import { defineConfig, devices } from "@playwright/test";
 
 const baseURL = process.env.BASE_URL ?? "http://localhost:8000";
+// The Docker run mounts this directory, so keep its artifacts apart from local
+// runs; otherwise a concurrent run wipes the other's test-results mid-flight.
+const suffix = process.env.CI ? "-ci" : "";
 
 // All specs share one SQLite database and each one resets it in setup,
 // so the suite must run serially.
@@ -11,7 +14,8 @@ export default defineConfig({
   retries: process.env.CI ? 1 : 0,
   timeout: 30_000,
   expect: { timeout: 10_000 },
-  reporter: [["list"], ["html", { open: "never" }]],
+  outputDir: `test-results${suffix}`,
+  reporter: [["list"], ["html", { open: "never", outputFolder: `playwright-report${suffix}` }]],
   use: {
     baseURL,
     trace: "retain-on-failure",
