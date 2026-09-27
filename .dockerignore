@@ -1,0 +1,35 @@
+.git
+.github
+.claude
+.DS_Store
+**/.DS_Store
+.env
+.env.*
+!.env.example
+
+# Node
+**/node_modules
+frontend/out
+frontend/.next
+frontend/coverage
+
+# Python
+**/.venv
+**/__pycache__
+**/*.pyc
+**/.pytest_cache
+**/.ruff_cache
+**/.coverage
+backend/static
+
+# Runtime data
+db/
+**/*.db
+**/*.db-journal
+**/*.db-wal
+**/*.db-shm
+
+# Not needed in the image
+planning
+test
+scripts
