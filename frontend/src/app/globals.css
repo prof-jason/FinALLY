@@ -1,0 +1,378 @@
+@import "tailwindcss";
+
+@theme {
+  --color-bg: #0d1117;
+  --color-panel: #121821;
+  --color-panel-2: #182030;
+  --color-line: #242d3a;
+  --color-text: #d8dee7;
+  --color-muted: #7d8896;
+  --color-accent: #ecad0a;
+  --color-blue: #209dd7;
+  --color-purple: #753991;
+  --color-up: #2fbf71;
+  --color-down: #e5534b;
+
+  --font-sans: "Inter", "Segoe UI", system-ui, -apple-system, "Helvetica Neue", Arial, sans-serif;
+  --font-mono: "JetBrains Mono", "SF Mono", ui-monospace, Menlo, Consolas, "Liberation Mono", monospace;
+}
+
+:root {
+  color-scheme: dark;
+}
+
+html,
+body {
+  background: var(--color-bg);
+  color: var(--color-text);
+  font-family: var(--font-sans);
+  font-size: 13px;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Numbers line up in columns and don't jitter as prices tick. */
+.num {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.01em;
+}
+
+.tone-up { color: var(--color-up); }
+.tone-down { color: var(--color-down); }
+.tone-flat { color: var(--color-muted); }
+
+:focus-visible {
+  outline: 2px solid var(--color-blue);
+  outline-offset: 1px;
+}
+
+/* ---------- Layout ---------- */
+
+.terminal-shell {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+.terminal-grid {
+  --chat-w: 340px;
+  display: grid;
+  gap: 6px;
+  padding: 6px;
+  grid-template-columns: 290px minmax(0, 1fr) var(--chat-w);
+  flex: 1;
+  min-height: 0;
+}
+.terminal-grid.chat-closed { --chat-w: 40px; }
+
+.area-center {
+  display: grid;
+  gap: 6px;
+  min-height: 0;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  grid-template-rows: minmax(260px, 1.25fr) auto minmax(200px, 1fr) minmax(180px, 0.9fr);
+  grid-template-areas:
+    "chart chart"
+    "trade trade"
+    "heat pnl"
+    "pos hist";
+}
+.area-chart { grid-area: chart; }
+.area-trade { grid-area: trade; }
+.area-heat { grid-area: heat; }
+.area-pnl { grid-area: pnl; }
+.area-positions { grid-area: pos; }
+.area-history { grid-area: hist; }
+.area-watchlist > section,
+.area-chat > aside,
+.area-center > div > section { height: 100%; }
+
+/* Wide screens: everything fits on one screen, panels scroll inside. */
+@media (min-width: 1100px) {
+  .terminal-shell { height: 100vh; }
+  .terminal-grid { overflow: hidden; }
+}
+
+/* Tablet: watchlist beside the workspace, chat drops underneath. */
+@media (max-width: 1099px) {
+  .terminal-grid,
+  .terminal-grid.chat-closed { grid-template-columns: 260px minmax(0, 1fr); }
+  .area-chat { grid-column: 1 / -1; height: 520px; }
+  .terminal-grid.chat-closed .area-chat { height: auto; }
+  .area-center { grid-template-rows: 320px auto 260px 260px; }
+}
+/* Phone: one column. */
+@media (max-width: 640px) {
+  .terminal-grid,
+  .terminal-grid.chat-closed { grid-template-columns: minmax(0, 1fr); }
+  .area-watchlist { height: 420px; }
+  .area-center {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: 300px auto 240px 240px 260px 260px;
+    grid-template-areas: "chart" "trade" "heat" "pnl" "pos" "hist";
+  }
+}
+
+/* ---------- Panels ---------- */
+
+.panel {
+  background: var(--color-panel);
+  border: 1px solid var(--color-line);
+  border-radius: 4px;
+}
+
+.panel-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  min-height: 34px;
+  padding: 6px 12px;
+  border-bottom: 1px solid var(--color-line);
+}
+
+.panel-title {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--color-text);
+  /* A short accent tick marks panel titles instead of an eyebrow label. */
+  padding-left: 8px;
+  border-left: 2px solid var(--color-accent);
+  line-height: 1.1;
+}
+
+/* ---------- Controls ---------- */
+
+.field {
+  background: var(--color-bg);
+  border: 1px solid var(--color-line);
+  border-radius: 3px;
+  padding: 5px 8px;
+  color: var(--color-text);
+  font-size: 13px;
+}
+.field::placeholder { color: #566170; text-transform: none; }
+.field:focus { border-color: var(--color-blue); outline: none; }
+.field[type="number"]::-webkit-inner-spin-button { opacity: 0.4; }
+
+.btn-base,
+.btn-blue,
+.btn-buy,
+.btn-sell,
+.btn-purple,
+.btn-ghost {
+  border-radius: 3px;
+  padding: 5px 12px;
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1.3;
+  cursor: pointer;
+  transition: filter 120ms, background-color 120ms;
+}
+:is(.btn-blue, .btn-buy, .btn-sell, .btn-purple, .btn-ghost):disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+:is(.btn-blue, .btn-buy, .btn-sell, .btn-purple):not(:disabled):hover { filter: brightness(1.12); }
+
+.btn-blue { background: var(--color-blue); color: #04121b; }
+.btn-purple { background: var(--color-purple); color: #f4ecf8; }
+.btn-buy { background: #1f8a54; color: #eafff2; min-width: 64px; }
+.btn-sell { background: #b23530; color: #fff0ef; min-width: 64px; }
+.btn-ghost {
+  background: transparent;
+  color: var(--color-muted);
+  border: 1px solid var(--color-line);
+}
+.btn-ghost:not(:disabled):hover { color: var(--color-accent); border-color: var(--color-accent); }
+
+.btn-icon {
+  width: 24px;
+  height: 24px;
+  border-radius: 3px;
+  color: var(--color-muted);
+  font-size: 18px;
+  line-height: 1;
+}
+.btn-icon:hover { color: var(--color-accent); background: var(--color-panel-2); }
+
+.chip {
+  border: 1px solid var(--color-line);
+  border-radius: 999px;
+  padding: 3px 10px;
+  font-size: 12px;
+  color: var(--color-text);
+}
+.chip:hover { border-color: var(--color-blue); color: var(--color-blue); }
+
+/* ---------- Connection status ---------- */
+
+.status-dot {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+}
+.status-connected { background: var(--color-up); box-shadow: 0 0 0 3px rgb(47 191 113 / 0.18); }
+.status-reconnecting { background: var(--color-accent); animation: pulse 1s ease-in-out infinite; }
+.status-disconnected { background: var(--color-down); }
+
+@keyframes pulse {
+  50% { opacity: 0.35; }
+}
+
+/* ---------- Watchlist ---------- */
+
+.wl-cols,
+.wl-select {
+  display: grid;
+  grid-template-columns: 52px minmax(0, 1fr) 66px 60px;
+  align-items: center;
+  gap: 8px;
+}
+.wl-cols { padding: 4px 30px 4px 12px; border-bottom: 1px solid var(--color-line); }
+
+.wl-row {
+  position: relative;
+  display: flex;
+  align-items: center;
+  border-bottom: 1px solid rgb(36 45 58 / 0.6);
+}
+.wl-row:hover { background: var(--color-panel-2); }
+.wl-row-selected { background: var(--color-panel-2); box-shadow: inset 2px 0 0 var(--color-accent); }
+
+.wl-select {
+  flex: 1;
+  min-width: 0;
+  padding: 5px 4px 5px 12px;
+  text-align: left;
+  cursor: pointer;
+}
+
+.wl-remove {
+  width: 26px;
+  align-self: stretch;
+  color: var(--color-muted);
+  font-size: 15px;
+  opacity: 0;
+}
+.wl-row:hover .wl-remove,
+.wl-remove:focus-visible { opacity: 1; }
+.wl-remove:hover { color: var(--color-down); }
+@media (hover: none) { .wl-remove { opacity: 1; } }
+
+/* Price flash: the class snaps the color on; removing it fades out over 500ms. */
+.price-cell {
+  border-radius: 2px;
+  padding: 1px 3px;
+  transition: background-color 500ms ease-out, color 500ms ease-out;
+}
+.price-cell.flash-up { background-color: rgb(47 191 113 / 0.32); color: #eafff2; transition: none; }
+.price-cell.flash-down { background-color: rgb(229 83 75 / 0.32); color: #fff0ef; transition: none; }
+
+/* ---------- Tables ---------- */
+
+.data-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  font-size: 12px;
+}
+.data-table th {
+  position: sticky;
+  top: 0;
+  background: var(--color-panel);
+  font-family: var(--font-sans);
+  font-weight: 500;
+  font-size: 11px;
+  color: var(--color-muted);
+  text-align: right;
+  padding: 5px 12px;
+  border-bottom: 1px solid var(--color-line);
+  white-space: nowrap;
+}
+.data-table td {
+  text-align: right;
+  padding: 4px 12px;
+  border-bottom: 1px solid rgb(36 45 58 / 0.5);
+  color: #aab4c0;
+  white-space: nowrap;
+}
+.data-table :is(th, td):first-child { text-align: left; }
+.data-table tbody tr:hover { background: var(--color-panel-2); }
+
+/* ---------- Heatmap ---------- */
+
+.heat-cell {
+  position: absolute;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 2px;
+  overflow: hidden;
+  border: 1px solid var(--color-panel);
+  color: #f3f6f9;
+  font-size: 12px;
+  transition: background-color 400ms ease-out;
+  text-shadow: 0 1px 1px rgb(0 0 0 / 0.35);
+}
+
+/* ---------- Chat ---------- */
+
+.chat-collapsed .panel-head { justify-content: center; padding: 6px 0; border-bottom: 0; }
+
+.chat-bubble {
+  max-width: 92%;
+  border-radius: 4px;
+  padding: 7px 10px;
+  font-size: 13px;
+  line-height: 1.5;
+}
+.chat-user {
+  margin-left: auto;
+  background: rgb(32 157 215 / 0.14);
+  border: 1px solid rgb(32 157 215 / 0.35);
+}
+.chat-assistant {
+  background: var(--color-panel-2);
+  border: 1px solid var(--color-line);
+}
+.chat-error {
+  background: rgb(229 83 75 / 0.1);
+  border: 1px solid rgb(229 83 75 / 0.4);
+  color: #f3b2ad;
+}
+
+.chat-action {
+  font-size: 12px;
+  padding: 3px 8px;
+  border-radius: 3px;
+  border-left: 2px solid;
+  background: rgb(13 17 23 / 0.6);
+}
+.chat-action.ok { border-color: var(--color-up); color: #bfeed3; }
+.chat-action.fail { border-color: var(--color-down); color: #f3b2ad; }
+
+.chat-loading { display: inline-flex; gap: 4px; padding: 10px 12px; }
+.chat-loading .dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--color-accent);
+  animation: blink 1.2s infinite ease-in-out;
+}
+.chat-loading .dot:nth-child(2) { animation-delay: 0.15s; }
+.chat-loading .dot:nth-child(3) { animation-delay: 0.3s; }
+@keyframes blink {
+  0%, 80%, 100% { opacity: 0.25; }
+  40% { opacity: 1; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .price-cell,
+  .heat-cell { transition: none; }
+  .status-reconnecting,
+  .chat-loading .dot { animation: none; }
+}
