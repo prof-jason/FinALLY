@@ -72,6 +72,18 @@ await source.stop()
    - `DEFAULT_CORR` removed
    - SSE, thread-safety and 10-ticker Cholesky tests
 
+## Demo
+
+`backend/market_data_demo.py` is a live Rich terminal dashboard. It shows prices, colored direction arrows, a 40-point sparkline for each ticker, session % change and update rate, plus a log of notable moves (≥1% by default).
+
+```bash
+cd backend
+uv run market_data_demo.py                     # 60s; simulator unless MASSIVE_API_KEY is exported
+uv run market_data_demo.py --duration 0        # run until Ctrl+C
+uv run market_data_demo.py --event-prob 0.01   # more random shocks
+uv run market_data_demo.py --tickers AAPL TSLA PYPL --threshold 0.5
+```
+
 ## Tests
 
 ```bash
